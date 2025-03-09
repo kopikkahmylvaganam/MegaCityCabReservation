@@ -14,11 +14,16 @@
         
         <div class="login-container">
         <h1>Signup</h1>
-        <form method="POST" action="SignupServlet">
+        
+        <!-- Display error message if registration fails -->
+        <% if (request.getAttribute("errorMessage") != null) { %>
+            <p style="color: red;"><%= request.getAttribute("errorMessage") %></p>
+        <% } %>
+
+        <form method="POST" action="Signup">
             <!-- Customer Registration Number (Auto-generated in the backend, optional in form) -->
             <label for="username">Username:</label>
             <input type="text" id="username" name="username" placeholder="Enter your username" required><br>
-            
             
             <label for="nic">NIC:</label>
             <input type="text" id="nic" name="nic" placeholder="Enter your NIC" required><br>
@@ -43,7 +48,5 @@
         <br> 
     </div>
 </section>
-
-
 </body>
 </html>
