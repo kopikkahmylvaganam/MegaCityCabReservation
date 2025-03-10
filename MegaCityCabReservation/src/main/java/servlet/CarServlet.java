@@ -9,57 +9,69 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.List;
 
-@WebServlet("/Car")
+@WebServlet("/Car") // Updated annotation
 public class CarServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+    private CarDao carDao;
 
-    // Handle GET requests
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        carDao = new CarDao();
+    }
+
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
 
         if ("edit".equals(action)) {
             int carId = Integer.parseInt(request.getParameter("carId"));
-            CarDao carDao = new CarDao();
             CarBean car = carDao.getCarById(carId);
             request.setAttribute("car", car);
             request.getRequestDispatcher("edit_car.jsp").forward(request, response);
         } else if ("delete".equals(action)) {
             int carId = Integer.parseInt(request.getParameter("carId"));
-            CarDao carDao = new CarDao();
             carDao.deleteCar(carId);
-            response.sendRedirect("CarServlet");
+            response.sendRedirect("/Car"); // Updated redirect URL
         } else {
             // View all cars
-            CarDao carDao = new CarDao();
-            List<CarBean> carList = carDao.getAllCars();
-            request.setAttribute("carList", carList);
+            request.setAttribute("carList", carDao.getAllCars());
             request.getRequestDispatcher("car.jsp").forward(request, response);
         }
     }
 
-    // Handle POST requests for adding/updating cars
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String carType = request.getParameter("car_type");
         double baseFare = Double.parseDouble(request.getParameter("base_fare"));
         double perKmRate = Double.parseDouble(request.getParameter("per_km_rate"));
         String carIdStr = request.getParameter("car_id");
 
-        CarDao carDao = new CarDao();
         CarBean car = new CarBean();
         car.setCarType(carType);
         car.setBaseFare(baseFare);
         car.setPerKmRate(perKmRate);
 
         if (carIdStr != null && !carIdStr.isEmpty()) {
+            // Update car
             car.setCarId(Integer.parseInt(carIdStr));
-            carDao.updateCar(car);
+            boolean isUpdated = carDao.updateCar(car);
+            if (isUpdated) {
+                response.sendRedirect("/Car"); // Updated redirect URL
+            } else {
+                request.setAttribute("errorMessage", "Failed to update car.");
+                request.getRequestDispatcher("edit_car.jsp").forward(request, response);
+            }
         } else {
-            carDao.addCar(car);
+            // Add new car
+            boolean isAdded = carDao.addCar(car);
+            if (isAdded) {
+                response.sendRedirect("/Car"); // Updated redirect URL
+            } else {
+                request.setAttribute("errorMessage", "Failed to add car.");
+                request.getRequestDispatcher("add_car.jsp").forward(request, response);
+            }
         }
-
-        response.sendRedirect("CarServlet");
     }
 }
-
