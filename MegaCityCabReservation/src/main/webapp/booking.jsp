@@ -1,5 +1,5 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.sql.*" %>  <!-- Import for SQL connection -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -33,9 +33,40 @@
 
                     <label for="carType">Choose Car Type:</label>
                     <select id="carType" name="carType" required>
-                        <option value="Sedan">Sedan</option>
-                        <option value="SUV">SUV</option>
-                        <option value="Luxury">Luxury</option>
+                        <option value="">Select Car Type</option>
+                        <% 
+                            // Database connection variables
+                            Connection conn = null;
+                            PreparedStatement ps = null;
+                            ResultSet rs = null;
+                            
+                            try {
+                                // Establish connection to MySQL database
+                                Class.forName("com.mysql.cj.jdbc.Driver");
+                                conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/Megacitycab", "root", "Kopikkah98@");
+                                
+                                // Query to get car types
+                                String query = "SELECT car_id, car_type FROM cars";
+                                ps = conn.prepareStatement(query);
+                                rs = ps.executeQuery();
+
+                                // Populate the dropdown with car types
+                                while (rs.next()) {
+                        %>
+                            <option value="<%= rs.getInt("car_id") %>"><%= rs.getString("car_type") %></option>
+                        <% 
+                                }
+                            } catch (Exception e) { 
+                        %>
+                            <option value="">Error loading car types</option>
+                        <% 
+                                e.printStackTrace();
+                            } finally {
+                                if (rs != null) rs.close();
+                                if (ps != null) ps.close();
+                                if (conn != null) conn.close();
+                            }
+                        %>
                     </select><br>
 
                     <label for="bookingDate">Booking Date:</label>

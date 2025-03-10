@@ -5,7 +5,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Sign up</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/home.css">
 </head>
 <body>
 <section>
@@ -13,7 +13,7 @@
         <h2>Welcome to Mega City Cab Reservation!</h2>
         
         <div class="login-container">
-        <h1>Signup</h1>
+        <h1> Customer Signup</h1>
         
         <!-- Display error message if registration fails -->
         <% if (request.getAttribute("errorMessage") != null) { %>
