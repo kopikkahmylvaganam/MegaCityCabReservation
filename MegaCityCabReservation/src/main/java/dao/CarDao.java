@@ -9,7 +9,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+
+
 public class CarDao {
+    // Database connection details
     private static final String URL = "jdbc:mysql://127.0.0.1:3306/Megacitycab?useSSL=false&serverTimezone=UTC";
     private static final String USER = "root";
     private static final String PASSWORD = "Kopikkah98@";
@@ -27,15 +30,35 @@ public class CarDao {
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // Replace with logging in a real application
+            return false;
         }
-        return false;
+    }
+
+    // Method to get all car types
+    public List<String> getAllCarTypes() {
+        List<String> carTypes = new ArrayList<>();
+        String sql = "SELECT DISTINCT car_type FROM cars";
+
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) {
+                carTypes.add(rs.getString("car_type"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace(); // Replace with logging in a real application
+        }
+
+        return carTypes;
     }
 
     // Method to get all cars
     public List<CarBean> getAllCars() {
         List<CarBean> carList = new ArrayList<>();
         String sql = "SELECT * FROM cars";
+
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -49,8 +72,9 @@ public class CarDao {
                 carList.add(car);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // Replace with logging in a real application
         }
+
         return carList;
     }
 
@@ -72,7 +96,7 @@ public class CarDao {
                 car.setPerKmRate(rs.getDouble("per_km_rate"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // Replace with logging in a real application
         }
         return car;
     }
@@ -91,9 +115,9 @@ public class CarDao {
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // Replace with logging in a real application
+            return false;
         }
-        return false;
     }
 
     // Method to delete a car
@@ -106,8 +130,8 @@ public class CarDao {
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // Replace with logging in a real application
+            return false;
         }
-        return false;
     }
 }

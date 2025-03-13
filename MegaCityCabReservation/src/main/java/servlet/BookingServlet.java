@@ -8,6 +8,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import bean.BookingBean;
 import dao.BookingDao;
@@ -53,6 +54,15 @@ public class BookingServlet extends HttpServlet {
             booking.setCarType(carType);
             booking.setBookingDate(localDate);  // Set LocalDate
             booking.setBookingTime(localTime);  // Set LocalTime
+
+            // Retrieve customer ID from session
+            HttpSession session = request.getSession();
+            Integer customerId = (Integer) session.getAttribute("customerId");
+            if (customerId != null) {
+                booking.setCustomerId(customerId);
+            } else {
+                throw new ServletException("Customer ID not found in session.");
+            }
 
             // Save booking details using the correct method from BookingDao
             BookingDao bookingDao = new BookingDao();

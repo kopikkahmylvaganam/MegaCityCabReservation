@@ -21,6 +21,7 @@
 
                 <!-- Form to handle car addition -->
                 <form method="POST" action="/Car">
+                <input type="hidden" name="action" value="add">
                     <label for="car_type">Car Type:</label>
                     <input type="text" id="car_type" name="car_type" placeholder="Enter car type" required><br>
 

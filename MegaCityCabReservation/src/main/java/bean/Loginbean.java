@@ -1,8 +1,8 @@
 package bean;
 
 public class Loginbean {
-    private String username;  // Username for login
-    private String password;  // Password for login
+    private String username;  
+    private String password;  
 
     // Constructor
     public Loginbean() {}

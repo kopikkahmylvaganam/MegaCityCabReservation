@@ -1,11 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.sql.*" %>  <!-- Import for SQL connection -->
+<%@ taglib uri="https://jakarta.ee/xml/ns/jakartaee/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Book a Cab</title>
-<link rel="stylesheet" href="css/styless.css"> <!-- Link to your CSS file -->
+    <meta charset="UTF-8">
+    <title>Book a Cab</title>
+    <link rel="stylesheet" href="css/styless.css"> <!-- Link to your CSS file -->
 </head>
 <body>
     <section>
@@ -16,12 +16,12 @@
                 <h1>Book a Cab</h1>
                 
                 <!-- Display error message if booking fails -->
-                <% if (request.getAttribute("errorMessage") != null) { %>
-                    <p style="color: red;"><%= request.getAttribute("errorMessage") %></p>
-                <% } %>
+                <c:if test="${not empty errorMessage}">
+                    <p style="color: red;">${errorMessage}</p>
+                </c:if>
 
-                <!-- Form action updated to call the BookingServlet -->
-                <form method="POST" action="BookingServlet">
+                <!-- Updated form action to match your annotation -->
+                <form method="POST" action="${pageContext.request.contextPath}/booking">
                     <label for="customerName">Customer Name:</label>
                     <input type="text" id="customerName" name="customerName" placeholder="Enter your name" required><br>
 
@@ -34,39 +34,9 @@
                     <label for="carType">Choose Car Type:</label>
                     <select id="carType" name="carType" required>
                         <option value="">Select Car Type</option>
-                        <% 
-                            // Database connection variables
-                            Connection conn = null;
-                            PreparedStatement ps = null;
-                            ResultSet rs = null;
-                            
-                            try {
-                                // Establish connection to MySQL database
-                                Class.forName("com.mysql.cj.jdbc.Driver");
-                                conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/Megacitycab", "root", "Kopikkah98@");
-                                
-                                // Query to get car types
-                                String query = "SELECT car_id, car_type FROM cars";
-                                ps = conn.prepareStatement(query);
-                                rs = ps.executeQuery();
-
-                                // Populate the dropdown with car types
-                                while (rs.next()) {
-                        %>
-                            <option value="<%= rs.getInt("car_id") %>"><%= rs.getString("car_type") %></option>
-                        <% 
-                                }
-                            } catch (Exception e) { 
-                        %>
-                            <option value="">Error loading car types</option>
-                        <% 
-                                e.printStackTrace();
-                            } finally {
-                                if (rs != null) rs.close();
-                                if (ps != null) ps.close();
-                                if (conn != null) conn.close();
-                            }
-                        %>
+                        <c:forEach var="car" items="${carTypes}">
+                            <option value="${car.carType}">${car.carType}</option>
+                        </c:forEach>
                     </select><br>
 
                     <label for="bookingDate">Booking Date:</label>

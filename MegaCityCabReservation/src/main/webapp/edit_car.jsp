@@ -20,6 +20,7 @@
                     <c:when test="${not empty car}">
                         <!-- Form to handle car editing -->
                         <form method="POST" action="/Car">
+                           <input type="hidden" name="action" value="update">
                             <input type="hidden" name="car_id" value="${car.carId}">
 
                             <label for="car_type">Car Type:</label>
