@@ -16,12 +16,20 @@
                 <h1>Car Management</h1>
 
                 <a href="add_car.jsp">Add New Car</a><br>
+                
+                <%-- Display error message if any --%>
+               <c:if test="${not empty errorMessage}">
+               <div class="error">${errorMessage}</div>
+             </c:if>
+                
 
                 <!-- List all cars -->
                 <table border="1">
                     <tr>
                         <th>Car ID</th>
                         <th>Car Type</th>
+                        <th>Vehicle Number</th>
+                        <th>Model</th>
                         <th>Base Fare</th>
                         <th>Per Km Rate</th>
                         <th>Actions</th>
@@ -30,6 +38,8 @@
                         <tr>
                             <td>${car.carId}</td>
                             <td>${car.carType}</td>
+                            <td>${car.vehicleNumber}</td>
+                            <td>${car.model}</td>
                             <td>${car.baseFare}</td>
                             <td>${car.perKmRate}</td>
                             <td>

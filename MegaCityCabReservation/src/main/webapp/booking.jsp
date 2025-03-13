@@ -1,5 +1,4 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib uri="https://jakarta.ee/xml/ns/jakartaee/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -22,21 +21,29 @@
 
                 <!-- Updated form action to match your annotation -->
                 <form method="POST" action="${pageContext.request.contextPath}/booking">
+                    <input type="hidden" name="userId" value="${sessionScope.userId}">
+                    
                     <label for="customerName">Customer Name:</label>
                     <input type="text" id="customerName" name="customerName" placeholder="Enter your name" required><br>
 
-                    <label for="pickupLocation">Pickup Location:</label>
-                    <input type="text" id="pickupLocation" name="pickupLocation" placeholder="Enter pickup location" required><br>
+                    <label for="telephone">Telephone:</label>
+                    <input type="text" id="telephone" name="telephone" placeholder="Enter your telephone number" required><br>
+
+                    <label for="currentLocation">Current Location:</label>
+                    <input type="text" id="currentLocation" name="currentLocation" placeholder="Enter pickup location" required><br>
 
                     <label for="destination">Destination:</label>
                     <input type="text" id="destination" name="destination" placeholder="Enter destination" required><br>
 
-                    <label for="carType">Choose Car Type:</label>
-                    <select id="carType" name="carType" required>
+                    <label for="distance">Distance (in km):</label>
+                    <input type="number" id="distance" name="distance" step="0.1" placeholder="Enter distance" required><br>
+
+                    <label for="vehicleType">Choose Car Type:</label>
+                    <select id="vehicleType" name="vehicleType" required>
                         <option value="">Select Car Type</option>
-                        <c:forEach var="car" items="${carTypes}">
-                            <option value="${car.carType}">${car.carType}</option>
-                        </c:forEach>
+                        <option value="sedan">Sedan</option>
+                        <option value="suv">SUV</option>
+                        <option value="luxury">Luxury</option>
                     </select><br>
 
                     <label for="bookingDate">Booking Date:</label>

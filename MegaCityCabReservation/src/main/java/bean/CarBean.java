@@ -1,9 +1,10 @@
 package bean;
 
-
 public class CarBean {
     private int carId;
     private String carType;
+    private String vehicleNumber; // New field for vehicle number
+    private String model; // New field for car model
     private double baseFare;
     private double perKmRate;
 
@@ -22,6 +23,22 @@ public class CarBean {
 
     public void setCarType(String carType) {
         this.carType = carType;
+    }
+
+    public String getVehicleNumber() {
+        return vehicleNumber;
+    }
+
+    public void setVehicleNumber(String vehicleNumber) {
+        this.vehicleNumber = vehicleNumber;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
     }
 
     public double getBaseFare() {

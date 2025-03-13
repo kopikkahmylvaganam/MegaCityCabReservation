@@ -32,8 +32,13 @@ public class CarServlet extends HttpServlet {
             request.getRequestDispatcher("edit_car.jsp").forward(request, response);
         } else if ("delete".equals(action)) {
             int carId = Integer.parseInt(request.getParameter("carId"));
-            carDao.deleteCar(carId);
-            response.sendRedirect("/Car"); // Updated redirect URL
+            boolean isDeleted = carDao.deleteCar(carId);
+            if (isDeleted) {
+                response.sendRedirect("car.jsp"); // Redirect to car.jsp after deletion
+            } else {
+                request.setAttribute("errorMessage", "Failed to delete car.");
+                request.getRequestDispatcher("car.jsp").forward(request, response);
+            }
         } else {
             // View all cars
             request.setAttribute("carList", carDao.getAllCars());
@@ -44,12 +49,16 @@ public class CarServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String carType = request.getParameter("car_type");
+        String vehicleNumber = request.getParameter("vehicle_number");
+        String model = request.getParameter("model");
         double baseFare = Double.parseDouble(request.getParameter("base_fare"));
         double perKmRate = Double.parseDouble(request.getParameter("per_km_rate"));
         String carIdStr = request.getParameter("car_id");
 
         CarBean car = new CarBean();
         car.setCarType(carType);
+        car.setVehicleNumber(vehicleNumber);
+        car.setModel(model);
         car.setBaseFare(baseFare);
         car.setPerKmRate(perKmRate);
 
@@ -58,19 +67,21 @@ public class CarServlet extends HttpServlet {
             car.setCarId(Integer.parseInt(carIdStr));
             boolean isUpdated = carDao.updateCar(car);
             if (isUpdated) {
-                response.sendRedirect("/Car"); // Updated redirect URL
+                response.sendRedirect("car.jsp"); // Redirect to car.jsp after update
             } else {
                 request.setAttribute("errorMessage", "Failed to update car.");
-                request.getRequestDispatcher("edit_car.jsp").forward(request, response);
+                request.setAttribute("carList", carDao.getAllCars()); // Pass the car list to display it
+                request.getRequestDispatcher("car.jsp").forward(request, response);
             }
         } else {
             // Add new car
             boolean isAdded = carDao.addCar(car);
             if (isAdded) {
-                response.sendRedirect("/Car"); // Updated redirect URL
+                response.sendRedirect("car.jsp"); // Redirect to car.jsp after adding the car
             } else {
                 request.setAttribute("errorMessage", "Failed to add car.");
-                request.getRequestDispatcher("add_car.jsp").forward(request, response);
+                request.setAttribute("carList", carDao.getAllCars()); // Pass the car list to display it
+                request.getRequestDispatcher("car.jsp").forward(request, response);
             }
         }
     }

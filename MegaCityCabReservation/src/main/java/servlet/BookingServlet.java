@@ -1,90 +1,128 @@
 package servlet;
 
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import bean.BookingBean;
+import bean.DriverBean;
+import bean.BillBean;
+import dao.BookingDao;
+import dao.BillDao;
+import dao.DriverDao;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 
-import bean.BookingBean;
-import dao.BookingDao;
-
-@WebServlet("/booking")  // URL pattern to map this servlet
+@WebServlet("/booking")
 public class BookingServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+    private BookingDao bookingDAO;
+    private BillDao billDAO;
+    private DriverDao driverDAO;
 
-    @Override
+    public void init() {
+        bookingDAO = new BookingDao();
+        billDAO = new BillDao();
+        driverDAO = new DriverDao();
+    }
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Retrieve booking details from the form
+        int customerId = Integer.parseInt(request.getParameter("customerId"));
         String customerName = request.getParameter("customerName");
-        String pickupLocation = request.getParameter("pickupLocation");
+        String telephone = request.getParameter("telephone");
+        String currentLocation = request.getParameter("currentLocation");
         String destination = request.getParameter("destination");
-        String carType = request.getParameter("carType");
+        double distance = Double.parseDouble(request.getParameter("distance"));
+        String vehicleType = request.getParameter("vehicleType");
         String bookingDate = request.getParameter("bookingDate");
         String bookingTime = request.getParameter("bookingTime");
 
-        // Basic validation for required fields
-        if (customerName == null || customerName.isEmpty() ||
-            pickupLocation == null || pickupLocation.isEmpty() ||
-            destination == null || destination.isEmpty() ||
-            carType == null || carType.isEmpty() ||
-            bookingDate == null || bookingDate.isEmpty() ||
-            bookingTime == null || bookingTime.isEmpty()) {
+        // Combine booking date and time into a single Timestamp
+        Timestamp bookingDateTime = Timestamp.valueOf(bookingDate + " " + bookingTime + ":00");
 
-            request.setAttribute("errorMessage", "All fields are required.");
+        // Find a random available driver for the selected car type
+        DriverBean driver = driverDAO.findAvailableDriverByCarType(vehicleType);
+        if (driver == null) {
+            request.setAttribute("errorMessage", "No drivers available for the selected car type.");
             request.getRequestDispatcher("booking.jsp").forward(request, response);
             return;
         }
 
-        // Convert booking date and time strings to SQL types
+        // Create and insert booking
+        BookingBean newBooking = new BookingBean();
+        newBooking.setCustomerId(customerId);
+        newBooking.setCustomerName(customerName);
+        newBooking.setTelephone(telephone);
+        newBooking.setCurrentLocation(currentLocation);
+        newBooking.setDestination(destination);
+        newBooking.setDistance(distance);
+        newBooking.setVehicleType(vehicleType);
+        newBooking.setBookingDate(bookingDateTime);
+
         try {
-            // Convert String to java.time.LocalDate and java.time.LocalTime
-            LocalDate localDate = LocalDate.parse(bookingDate);  // Format: YYYY-MM-DD
-            LocalTime localTime = LocalTime.parse(bookingTime);  // Format: HH:MM
+            bookingDAO.insertBooking(newBooking);
 
-            // Create BookingBean object and set data
-            BookingBean booking = new BookingBean();
-            booking.setCustomerName(customerName);
-            booking.setPickupLocation(pickupLocation);
-            booking.setDestination(destination);
-            booking.setCarType(carType);
-            booking.setBookingDate(localDate);  // Set LocalDate
-            booking.setBookingTime(localTime);  // Set LocalTime
-
-            // Retrieve customer ID from session
-            HttpSession session = request.getSession();
-            Integer customerId = (Integer) session.getAttribute("customerId");
-            if (customerId != null) {
-                booking.setCustomerId(customerId);
-            } else {
-                throw new ServletException("Customer ID not found in session.");
+            // Calculate the bill dynamically
+            double baseFarePerKm = 0;
+            switch (vehicleType.toLowerCase()) {
+                case "sedan":
+                    baseFarePerKm = 10.0; // $10 per km for sedan
+                    break;
+                case "suv":
+                    baseFarePerKm = 15.0; // $15 per km for SUV
+                    break;
+                case "luxury":
+                    baseFarePerKm = 20.0; // $20 per km for luxury
+                    break;
+                default:
+                    baseFarePerKm = 10.0; // Default to sedan fare
             }
+            double baseFare = distance * baseFarePerKm;
 
-            // Save booking details using the correct method from BookingDao
-            BookingDao bookingDao = new BookingDao();
-            boolean isBooked = bookingDao.addBooking(booking); // Using addBooking instead of saveBooking
+            // Tax calculation (10% of base fare)
+            double taxRate = 10.0;
+            double tax = baseFare * (taxRate / 100);
 
-            if (isBooked) {
-                // Successfully booked, redirect to success page
-                response.sendRedirect("booking_success.jsp");  
-            } else {
-                // Booking failed, forward to booking page with error message
-                request.setAttribute("errorMessage", "Booking failed. Please try again.");
-                request.getRequestDispatcher("booking.jsp").forward(request, response);
-            }
-        } catch (IllegalArgumentException e) {
-            // Catching parsing issues like wrong date/time format
-            request.setAttribute("errorMessage", "Invalid date or time format. Please follow the correct format.");
-            request.getRequestDispatcher("booking.jsp").forward(request, response);
-        } catch (Exception e) {
-            // Catching all other exceptions
+            // Total amount calculation
+            double totalAmount = baseFare + tax;
+
+            // Create and insert bill
+            BillBean bill = new BillBean();
+            bill.setBookingId(newBooking.getBookingId());
+            bill.setBaseFare(baseFare);
+            bill.setTax(tax);
+            bill.setTotalAmount(totalAmount);
+            billDAO.insertBill(bill);
+
+            // Update driver availability
+            driverDAO.updateDriverAvailability(driver.getDriverId(), false);
+
+            // Set customer and bill details in the request for display
+            request.setAttribute("customerId", customerId); // Use customerId
+            request.setAttribute("customerName", customerName);
+            request.setAttribute("carType", vehicleType);
+            request.setAttribute("pickupLocation", currentLocation);
+            request.setAttribute("destination", destination);
+            request.setAttribute("bookingDate", bookingDate); // Date part only
+            request.setAttribute("bookingTime", bookingTime); // Time part only
+            request.setAttribute("driverId", driver.getDriverId());
+            request.setAttribute("distance", distance);
+            request.setAttribute("totalFare", totalAmount);
+
+            // Set driver and bill details in the request for display
+            request.setAttribute("driver", driver);
+            request.setAttribute("booking", newBooking);
+            request.setAttribute("bill", bill);
+
+        } catch (SQLException e) {
             e.printStackTrace();
-            request.setAttribute("errorMessage", "An unexpected error occurred. Please try again.");
+            request.setAttribute("errorMessage", "An error occurred while processing your booking. Please try again.");
             request.getRequestDispatcher("booking.jsp").forward(request, response);
+            return;
         }
+        request.getRequestDispatcher("booking_success.jsp").forward(request, response);
     }
 }

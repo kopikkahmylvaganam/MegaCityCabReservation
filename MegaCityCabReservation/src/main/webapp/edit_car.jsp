@@ -25,6 +25,13 @@
 
                             <label for="car_type">Car Type:</label>
                             <input type="text" id="car_type" name="car_type" value="${car.carType}" required><br>
+                            
+                            <label for="vehicle_number">Vehicle Number:</label>
+                            <input type="text" id="vehicle_number" name="vehicle_number" value="${car.vehicleNumber}" required><br>
+
+                            <label for="model">Model:</label>
+                            <input type="text" id="model" name="model" value="${car.model}" required><br>
+                            
 
                             <label for="base_fare">Base Fare:</label>
                             <input type="number" id="base_fare" name="base_fare" value="${car.baseFare}" step="0.01" required><br>

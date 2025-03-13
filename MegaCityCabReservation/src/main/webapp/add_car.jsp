@@ -24,12 +24,19 @@
                 <input type="hidden" name="action" value="add">
                     <label for="car_type">Car Type:</label>
                     <input type="text" id="car_type" name="car_type" placeholder="Enter car type" required><br>
+                    
+                    <label for="vehicle_number">Vehicle Number:</label>
+                    <input type="text" id="vehicle_number" name="vehicle_number" placeholder="Enter vehicle number" required><br>
+
+                    <label for="model">Model:</label>
+                    <input type="text" id="model" name="model" placeholder="Enter car model" required><br>
+                    
 
                     <label for="base_fare">Base Fare:</label>
-                    <input type="number" id="base_fare" name="base_fare" step="0.01" placeholder="Enter base fare" required><br>
+                    <input type="number" id="base_fare" name="base_fare" value="50.00" step="10" placeholder="Enter base fare" required><br><br>
 
                     <label for="per_km_rate">Per Kilometer Rate:</label>
-                    <input type="number" id="per_km_rate" name="per_km_rate" step="0.01" placeholder="Enter per km rate" required><br>
+                    <input type="number" id="per_km_rate" name="per_km_rate" step="20" placeholder="Enter per km rate" required><br><br>
 
                     <input type="submit" id="add_car" name="add_car" value="Add Car">
                 </form>

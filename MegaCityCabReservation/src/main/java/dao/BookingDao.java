@@ -1,103 +1,140 @@
 package dao;
 
-import java.sql.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.PreparedStatement;
 import bean.BookingBean;
-
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BookingDao {
-    private static final String INSERT_BOOKING_SQL = "INSERT INTO bookings (customer_id, customer_name, pickup_location, destination, car_type, booking_date, booking_time, driver_id, distance, total_fare) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String FIND_DRIVER_SQL = "SELECT driver_id FROM drivers WHERE car_type = ? AND is_available = TRUE LIMIT 1";
-    private static final String UPDATE_DRIVER_SQL = "UPDATE drivers SET is_available = FALSE WHERE driver_id = ?";
+    private static final String INSERT_BOOKING_SQL = "INSERT INTO bookings (customer_id, customer_name, telephone, current_location, destination, distance, vehicle_type, booking_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String SELECT_BOOKING_BY_ID_SQL = "SELECT * FROM bookings WHERE booking_id = ?";
+    private static final String SELECT_ALL_BOOKINGS_BY_USER_ID_SQL = "SELECT * FROM bookings WHERE user_id = ?"; // Added this line
+    private static final String UPDATE_BOOKING_SQL = "UPDATE bookings SET customer_name = ?, telephone = ?, current_location = ?, destination = ?, distance = ?, vehicle_type = ?, booking_date = ? WHERE booking_id = ?";
+    private static final String DELETE_BOOKING_SQL = "DELETE FROM bookings WHERE booking_id = ?";
 
-    // Define base fare and per-kilometer rates for each car type
-    private static final double SEDAN_BASE_FARE = 50.0;
-    private static final double SEDAN_PER_KM_RATE = 10.0;
+    protected Connection getConnection() throws SQLException {
+        return DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/Megacitycab?useSSL=false&serverTimezone=UTC", "root", "Kopikkah98@");
+    }
 
-    private static final double SUV_BASE_FARE = 70.0;
-    private static final double SUV_PER_KM_RATE = 15.0;
+    // Insert a new booking
+    public void insertBooking(BookingBean booking) throws SQLException {
+        try (Connection connection = getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_BOOKING_SQL, Statement.RETURN_GENERATED_KEYS)) {
+        	preparedStatement.setInt(1, booking.getCustomerId());
+            preparedStatement.setString(2, booking.getCustomerName());
+            preparedStatement.setString(3, booking.getTelephone());
+            preparedStatement.setString(4, booking.getCurrentLocation());
+            preparedStatement.setString(5, booking.getDestination());
+            preparedStatement.setDouble(6, booking.getDistance());
+            preparedStatement.setString(7, booking.getVehicleType());
+            preparedStatement.setTimestamp(8, booking.getBookingDate());
 
-    private static final double LUXURY_BASE_FARE = 100.0;
-    private static final double LUXURY_PER_KM_RATE = 20.0;
+            preparedStatement.executeUpdate();
 
-    public boolean addBooking(BookingBean bookingBean) throws SQLException {
-        boolean result = false;
-
-        try (Connection conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/Megacitycab?useSSL=false&serverTimezone=UTC", "root", "Kopikkah98@");
-             PreparedStatement psDriver = conn.prepareStatement(FIND_DRIVER_SQL);
-             PreparedStatement psBooking = conn.prepareStatement(INSERT_BOOKING_SQL)) {
-
-            // Find an available driver
-            psDriver.setString(1, bookingBean.getCarType());
-            try (ResultSet rsDriver = psDriver.executeQuery()) {
-                if (rsDriver.next()) {
-                    int driverId = rsDriver.getInt("driver_id");
-
-                    // Mark the driver as unavailable
-                    try (PreparedStatement psUpdateDriver = conn.prepareStatement(UPDATE_DRIVER_SQL)) {
-                        psUpdateDriver.setInt(1, driverId);
-                        psUpdateDriver.executeUpdate();
-                    }
-
-                    // Calculate distance (you can use a distance API or hardcode for simplicity)
-                    double distance = calculateDistance(bookingBean.getPickupLocation(), bookingBean.getDestination());
-
-                    // Calculate total fare based on car type and distance
-                    double totalFare = calculateTotalFare(bookingBean.getCarType(), distance);
-
-                    // Insert the booking with billing details
-                    psBooking.setInt(1, bookingBean.getCustomerId()); // Retrieve customer ID from session
-                    psBooking.setString(2, bookingBean.getCustomerName());
-                    psBooking.setString(3, bookingBean.getPickupLocation());
-                    psBooking.setString(4, bookingBean.getDestination());
-                    psBooking.setString(5, bookingBean.getCarType());
-                    psBooking.setDate(6, Date.valueOf(bookingBean.getBookingDate()));
-                    psBooking.setTime(7, Time.valueOf(bookingBean.getBookingTime()));
-                    psBooking.setInt(8, driverId);
-                    psBooking.setDouble(9, distance);
-                    psBooking.setDouble(10, totalFare);
-
-                    result = psBooking.executeUpdate() > 0;
-                } else {
-                    throw new SQLException("No available drivers for the selected car type.");
+            // Retrieve the generated booking ID
+            try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    booking.setBookingId(generatedKeys.getInt(1));
                 }
             }
         }
-
-        return result;
     }
 
-    // Method to calculate distance (you can replace this with a real distance API)
-    private double calculateDistance(String pickupLocation, String destination) {
-        // For simplicity, return a hardcoded distance (e.g., 10 km)
-        return 10.0;
-    }
+    // Fetch a booking by ID
+    public BookingBean selectBookingById(int bookingId) {
+        BookingBean booking = null;
+        try (Connection connection = getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BOOKING_BY_ID_SQL)) {
+            preparedStatement.setInt(1, bookingId);
+            ResultSet rs = preparedStatement.executeQuery();
 
-    // Method to calculate total fare based on car type and distance
-    private double calculateTotalFare(String carType, double distance) {
-        double baseFare = 0.0;
-        double perKmRate = 0.0;
+            if (rs.next()) {
+                int customerId = rs.getInt("customer_id");
+                String customerName = rs.getString("customer_name");
+                String telephone = rs.getString("telephone");
+                String currentLocation = rs.getString("current_location");
+                String destination = rs.getString("destination");
+                double distance = rs.getDouble("distance");
+                String vehicleType = rs.getString("vehicle_type");
+                Timestamp bookingDate = rs.getTimestamp("booking_date");
 
-        switch (carType) {
-            case "Sedan":
-                baseFare = SEDAN_BASE_FARE;
-                perKmRate = SEDAN_PER_KM_RATE;
-                break;
-            case "SUV":
-                baseFare = SUV_BASE_FARE;
-                perKmRate = SUV_PER_KM_RATE;
-                break;
-            case "Luxury":
-                baseFare = LUXURY_BASE_FARE;
-                perKmRate = LUXURY_PER_KM_RATE;
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid car type: " + carType);
+                booking = new BookingBean();
+                booking.setBookingId(bookingId);
+                booking.setCustomerId(customerId);
+                booking.setCustomerName(customerName);
+                booking.setTelephone(telephone);
+                booking.setCurrentLocation(currentLocation);
+                booking.setDestination(destination);
+                booking.setDistance(distance);
+                booking.setVehicleType(vehicleType);
+                booking.setBookingDate(bookingDate);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+        return booking;
+    }
 
-        return baseFare + (distance * perKmRate);
+    // Fetch all bookings by user ID
+    public List<BookingBean> selectAllBookingsByCustomerId(int customerId) { // Added this method
+        List<BookingBean> bookings = new ArrayList<>();
+        try (Connection connection = getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_BOOKINGS_BY_USER_ID_SQL)) {
+            preparedStatement.setInt(1, customerId);
+            ResultSet rs = preparedStatement.executeQuery();
+
+            while (rs.next()) {
+                int bookingId = rs.getInt("booking_id");
+                String customerName = rs.getString("customer_name");
+                String telephone = rs.getString("telephone");
+                String currentLocation = rs.getString("current_location");
+                String destination = rs.getString("destination");
+                double distance = rs.getDouble("distance");
+                String vehicleType = rs.getString("vehicle_type");
+                Timestamp bookingDate = rs.getTimestamp("booking_date");
+
+                BookingBean booking = new BookingBean();
+                booking.setBookingId(bookingId);
+                booking.setCustomerId(customerId);
+                booking.setCustomerName(customerName);
+                booking.setTelephone(telephone);
+                booking.setCurrentLocation(currentLocation);
+                booking.setDestination(destination);
+                booking.setDistance(distance);
+                booking.setVehicleType(vehicleType);
+                booking.setBookingDate(bookingDate);
+
+                bookings.add(booking);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return bookings;
+    }
+
+    // Update a booking
+    public void updateBooking(BookingBean booking) throws SQLException {
+        try (Connection connection = getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_BOOKING_SQL)) {
+            preparedStatement.setString(1, booking.getCustomerName());
+            preparedStatement.setString(2, booking.getTelephone());
+            preparedStatement.setString(3, booking.getCurrentLocation());
+            preparedStatement.setString(4, booking.getDestination());
+            preparedStatement.setDouble(5, booking.getDistance());
+            preparedStatement.setString(6, booking.getVehicleType());
+            preparedStatement.setTimestamp(7, booking.getBookingDate());
+            preparedStatement.setInt(8, booking.getBookingId());
+
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    // Delete a booking
+    public void deleteBooking(int bookingId) throws SQLException {
+        try (Connection connection = getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_BOOKING_SQL)) {
+            preparedStatement.setInt(1, bookingId);
+            preparedStatement.executeUpdate();
+        }
     }
 }

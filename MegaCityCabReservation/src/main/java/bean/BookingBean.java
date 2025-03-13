@@ -1,98 +1,43 @@
 package bean;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.sql.Timestamp;
 
 public class BookingBean {
+    private int bookingId;
     private int customerId;
     private String customerName;
-    private String pickupLocation;
+    private String telephone;
+    private String currentLocation;
     private String destination;
-    private String carType;
-    private LocalDate bookingDate;
-    private LocalTime bookingTime;
-    private int driverId;
     private double distance;
-    private double totalFare;
+    private String vehicleType;
+    private Timestamp bookingDate;
 
     // Getters and Setters
-    public int getCustomerId() {
-        return customerId;
-    }
+    public int getBookingId() { return bookingId; }
+    public void setBookingId(int bookingId) { this.bookingId = bookingId; }
 
-    public void setCustomerId(int customerId) {
-        this.customerId = customerId;
-    }
+    public int getCustomerId() { return customerId; } // Add getter for customerId
+    public void setCustomerId(int customerId) { this.customerId = customerId; }
 
-    public String getCustomerName() {
-        return customerName;
-    }
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
 
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
-    }
+    public String getTelephone() { return telephone; }
+    public void setTelephone(String telephone) { this.telephone = telephone; }
 
-    public String getPickupLocation() {
-        return pickupLocation;
-    }
+    public String getCurrentLocation() { return currentLocation; }
+    public void setCurrentLocation(String currentLocation) { this.currentLocation = currentLocation; }
 
-    public void setPickupLocation(String pickupLocation) {
-        this.pickupLocation = pickupLocation;
-    }
+    public String getDestination() { return destination; }
+    public void setDestination(String destination) { this.destination = destination; }
 
-    public String getDestination() {
-        return destination;
-    }
+    public double getDistance() { return distance; }
+    public void setDistance(double distance) { this.distance = distance; }
 
-    public void setDestination(String destination) {
-        this.destination = destination;
-    }
+    public String getVehicleType() { return vehicleType; }
+    public void setVehicleType(String vehicleType) { this.vehicleType = vehicleType; }
 
-    public String getCarType() {
-        return carType;
-    }
-
-    public void setCarType(String carType) {
-        this.carType = carType;
-    }
-
-    public LocalDate getBookingDate() {
-        return bookingDate;
-    }
-
-    public void setBookingDate(LocalDate bookingDate) {
-        this.bookingDate = bookingDate;
-    }
-
-    public LocalTime getBookingTime() {
-        return bookingTime;
-    }
-
-    public void setBookingTime(LocalTime bookingTime) {
-        this.bookingTime = bookingTime;
-    }
-
-    public int getDriverId() {
-        return driverId;
-    }
-
-    public void setDriverId(int driverId) {
-        this.driverId = driverId;
-    }
-
-    public double getDistance() {
-        return distance;
-    }
-
-    public void setDistance(double distance) {
-        this.distance = distance;
-    }
-
-    public double getTotalFare() {
-        return totalFare;
-    }
-
-    public void setTotalFare(double totalFare) {
-        this.totalFare = totalFare;
-    }
+    public Timestamp getBookingDate() { return bookingDate; }
+    public void setBookingDate(Timestamp bookingDate) { this.bookingDate = bookingDate; }
 }

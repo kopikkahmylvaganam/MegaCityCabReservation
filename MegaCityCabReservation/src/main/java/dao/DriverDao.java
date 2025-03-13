@@ -15,6 +15,8 @@ public class DriverDao {
     private static final String SELECT_DRIVER_BY_ID_SQL = "SELECT * FROM drivers WHERE driver_id = ?";
     private static final String UPDATE_DRIVER_SQL = "UPDATE drivers SET username = ?, nic = ?, address = ?, phone = ?, licence_number = ?, email = ?, car_type = ?, availability = ? WHERE driver_id = ?";
     private static final String DELETE_DRIVER_SQL = "DELETE FROM drivers WHERE driver_id = ?";
+    private static final String FIND_AVAILABLE_DRIVER_BY_CAR_TYPE_SQL = "SELECT * FROM drivers WHERE car_type = ? AND availability = true LIMIT 1";
+    private static final String UPDATE_DRIVER_AVAILABILITY_SQL = "UPDATE drivers SET availability = ? WHERE driver_id = ?";
 
     protected Connection getConnection() {
         Connection connection = null;
@@ -127,6 +129,46 @@ public class DriverDao {
         try (Connection connection = getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(DELETE_DRIVER_SQL)) {
             preparedStatement.setInt(1, driverId);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            printSQLException(e);
+        }
+    }
+
+    // Find an available driver by car type
+    public DriverBean findAvailableDriverByCarType(String carType) {
+        DriverBean driver = null;
+        try (Connection connection = getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(FIND_AVAILABLE_DRIVER_BY_CAR_TYPE_SQL)) {
+            preparedStatement.setString(1, carType);
+            ResultSet rs = preparedStatement.executeQuery();
+
+            if (rs.next()) {
+                int driverId = rs.getInt("driver_id");
+                String username = rs.getString("username");
+                String nic = rs.getString("nic");
+                String address = rs.getString("address");
+                String phone = rs.getString("phone");
+                String licenceNumber = rs.getString("licence_number");
+                String email = rs.getString("email");
+                boolean availability = rs.getBoolean("availability");
+
+                driver = new DriverBean(username, nic, address, phone, licenceNumber, email, carType, "");
+                driver.setDriverId(driverId);
+                driver.setAvailability(availability);
+            }
+        } catch (SQLException e) {
+            printSQLException(e);
+        }
+        return driver;
+    }
+
+    // Update driver availability
+    public void updateDriverAvailability(int driverId, boolean availability) throws SQLException {
+        try (Connection connection = getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_DRIVER_AVAILABILITY_SQL)) {
+            preparedStatement.setBoolean(1, availability);
+            preparedStatement.setInt(2, driverId);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             printSQLException(e);
