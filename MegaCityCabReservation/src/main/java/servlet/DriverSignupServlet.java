@@ -33,11 +33,11 @@ public class DriverSignupServlet extends HttpServlet {
 
         try {
             driverDAO.insertDriver(newDriver);
-            response.sendRedirect("driver-signup-success.jsp");
+            response.sendRedirect("login.jsp");
         } catch (SQLException e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "Failed to sign up. Please try again.");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            request.getRequestDispatcher("driversignup.jsp").forward(request, response);
         }
     }
 }

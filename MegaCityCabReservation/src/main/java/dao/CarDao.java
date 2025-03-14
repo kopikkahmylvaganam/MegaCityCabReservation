@@ -66,7 +66,7 @@ public class CarDao {
     // Method to get all cars
     public List<CarBean> getAllCars() {
         List<CarBean> carList = new ArrayList<>();
-        String sql = "SELECT * FROM cars";
+        String sql = "SELECT * FROM Megacitycab.cars";
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {

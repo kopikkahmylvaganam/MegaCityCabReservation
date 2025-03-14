@@ -538,6 +538,10 @@ label {
 }
 
 input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="tel"],
 input[type="password"],
 input[type="email"] {
     width: calc(100% - 12px);
@@ -735,6 +739,84 @@ form textarea {
         flex: 1 0 100%; /* Each offer takes full width on smaller screens */
         margin-bottom: 20px; /* Add some space between offers */
     }
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+thead {
+    background-color: #222;
+    color: #fff;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    font-weight: 500;
+}
+
+tbody tr:hover {
+    background-color: #f8f8f8;
+}
+
+a {
+    color: #f8b500;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+a:hover {
+    color: #d49400;
+}
+
+/* Button Links */
+.actions a {
+    margin: 0 5px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+}
+
+.actions a:first-child {
+    background-color: #007bff;
+    color: white;
+}
+
+.actions a:last-child {
+    background-color: #dc3545;
+    color: white;
+}
+
+.actions a:hover {
+    opacity: 0.8;
+}
+
+/* Add Driver Link */
+.add-driver {
+    display: block;
+    width: fit-content;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: #f8b500;
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.add-driver:hover {
+    background-color: #d49400;
 }
 
 

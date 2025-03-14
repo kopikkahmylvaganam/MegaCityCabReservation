@@ -5,11 +5,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/home.css">
 </head>
 <body>
-    <h1>Admin Dashboard</h1>
-    <h2>Driver Details</h2>
+   <section>
+   <div class="login" id="login">
+   
+    <h1>Driver Details</h1>
 
     <%-- Display error message if any --%>
     <% 
@@ -70,5 +72,7 @@
 
     <br>
     <a href="add-driver.jsp">Add New Driver</a>
+    </div>
+    </section>
 </body>
 </html>

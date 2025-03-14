@@ -64,34 +64,35 @@ public class BookingServlet extends HttpServlet {
 
         try {
             bookingDAO.insertBooking(newBooking);
+            int bookingId = newBooking.getBookingId(); // Ensure Booking ID is retrieved
 
             // Calculate the bill dynamically
-            double baseFarePerKm = 0;
+            double baseFarePerKm;
+
             switch (vehicleType.toLowerCase()) {
                 case "sedan":
-                    baseFarePerKm = 10.0; // $10 per km for sedan
+                    baseFarePerKm = 10.0;
                     break;
                 case "suv":
-                    baseFarePerKm = 15.0; // $15 per km for SUV
+                    baseFarePerKm = 15.0;
                     break;
                 case "luxury":
-                    baseFarePerKm = 20.0; // $20 per km for luxury
+                    baseFarePerKm = 20.0;
                     break;
                 default:
-                    baseFarePerKm = 10.0; // Default to sedan fare
+                    baseFarePerKm = 10.0;
+                    break;
             }
-            double baseFare = distance * baseFarePerKm;
 
-            // Tax calculation (10% of base fare)
+            double baseFare = distance * baseFarePerKm;
             double taxRate = 10.0;
             double tax = baseFare * (taxRate / 100);
-
-            // Total amount calculation
             double totalAmount = baseFare + tax;
+
 
             // Create and insert bill
             BillBean bill = new BillBean();
-            bill.setBookingId(newBooking.getBookingId());
+            bill.setBookingId(bookingId);
             bill.setBaseFare(baseFare);
             bill.setTax(tax);
             bill.setTotalAmount(totalAmount);
@@ -100,29 +101,29 @@ public class BookingServlet extends HttpServlet {
             // Update driver availability
             driverDAO.updateDriverAvailability(driver.getDriverId(), false);
 
-            // Set customer and bill details in the request for display
-            request.setAttribute("customerId", customerId); // Use customerId
+            // Set booking details
+            request.setAttribute("bookingId", bookingId);
+            request.setAttribute("customerId", customerId);
             request.setAttribute("customerName", customerName);
             request.setAttribute("carType", vehicleType);
             request.setAttribute("pickupLocation", currentLocation);
             request.setAttribute("destination", destination);
-            request.setAttribute("bookingDate", bookingDate); // Date part only
-            request.setAttribute("bookingTime", bookingTime); // Time part only
+            request.setAttribute("bookingDate", bookingDate);
+            request.setAttribute("bookingTime", bookingTime);
             request.setAttribute("driverId", driver.getDriverId());
             request.setAttribute("distance", distance);
+
+            // Bill details
+            request.setAttribute("baseFare", baseFare);
+            request.setAttribute("tax", tax);
             request.setAttribute("totalFare", totalAmount);
 
-            // Set driver and bill details in the request for display
-            request.setAttribute("driver", driver);
-            request.setAttribute("booking", newBooking);
-            request.setAttribute("bill", bill);
+            request.getRequestDispatcher("booking_success.jsp").forward(request, response);
 
         } catch (SQLException e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "An error occurred while processing your booking. Please try again.");
             request.getRequestDispatcher("booking.jsp").forward(request, response);
-            return;
         }
-        request.getRequestDispatcher("booking_success.jsp").forward(request, response);
     }
 }

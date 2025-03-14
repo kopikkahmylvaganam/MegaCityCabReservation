@@ -4,15 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Book a Cab</title>
-    <link rel="stylesheet" href="css/styless.css"> <!-- Link to your CSS file -->
+    <link rel="stylesheet" href="css/home.css"> <!-- Link to your CSS file -->
 </head>
 <body>
     <section>
-        <div class="booking" id="booking">
-            <h2>Book Your Cab Now!</h2>
-            <br><br>
-            <div class="booking-container">
-                <h1>Book a Cab</h1>
+        <div class="login" id="login">
+        <h2>Welcome to Mega City Cab Reservation!</h2>
+        
+        <div class="login-container">
+        <h1>Book a cab now</h1>
                 
                 <!-- Display error message if booking fails -->
                 <c:if test="${not empty errorMessage}">

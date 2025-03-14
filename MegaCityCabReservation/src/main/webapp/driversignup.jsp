@@ -27,7 +27,7 @@
                     <input type="text" id="address" name="address" placeholder="Enter your address" required><br>
 
                     <label for="phone">Phone:</label>
-                    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" pattern="[0-9]{10}" required><br>
+                    <input type="text" id="phone" name="phone" placeholder="Enter your phone number" pattern="[0-9]{10}" required><br>
 
                     <label for="licencenumber">Licence Number:</label>
                     <input type="text" id="licencenumber" name="licencenumber" placeholder="Enter your licence number" required><br>
